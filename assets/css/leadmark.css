@@ -11869,6 +11869,10 @@ textarea.form-control {
   background: #000;
 }
 
+.video-preview-video {
+  object-fit: contain;
+}
+
 .video-preview-modal.is-post-preview .video-preview-frame iframe {
   background: #18191a;
 }
@@ -12074,7 +12078,27 @@ textarea.form-control {
 
 @media (max-width: 575.98px) {
   .video-preview-modal {
-    padding: 12px;
+    padding: 10px;
+  }
+
+  .video-preview-dialog {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .video-preview-modal.is-drive-preview {
+    padding: 0;
+  }
+
+  .video-preview-modal.is-drive-preview .video-preview-dialog {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .video-preview-modal.is-drive-preview .video-preview-frame {
+    height: 100dvh;
+    aspect-ratio: auto;
   }
 
   .video-preview-close {
