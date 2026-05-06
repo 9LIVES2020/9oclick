@@ -126,12 +126,17 @@ $(document).ready(function() {
         return !!normalizedUrl && /\/media\/set|\/share\/a\//.test(normalizedUrl);
     }
 
-    function googleDriveEmbedUrl(url) {
+    function googleDriveFileId(url) {
         if (!/drive\.google\.com/.test(url)) return "";
 
         var fileMatch = url.match(/\/file\/d\/([^/]+)/);
         var idMatch = url.match(/[?&]id=([^&]+)/);
-        var fileId = fileMatch ? fileMatch[1] : (idMatch ? idMatch[1] : "");
+
+        return fileMatch ? fileMatch[1] : (idMatch ? idMatch[1] : "");
+    }
+
+    function googleDriveEmbedUrl(url) {
+        var fileId = googleDriveFileId(url);
 
         return fileId ? "https://drive.google.com/file/d/" + fileId + "/preview" : "";
     }
@@ -175,6 +180,10 @@ $(document).ready(function() {
         return !!facebookPostEmbedUrl(url) && !facebookEmbedUrl(url);
     }
 
+    function isGoogleDrivePreview(url) {
+        return !!googleDriveEmbedUrl(url);
+    }
+
     function getPreviewMarkup(url, link) {
         var directUrl = directVideoUrl(url);
         var directImage = directImageUrl(url);
@@ -185,7 +194,7 @@ $(document).ready(function() {
         }
 
         if (directUrl) {
-            return '<video src="' + directUrl + '" controls autoplay playsinline></video>';
+            return '<video class="video-preview-video" src="' + directUrl + '" controls autoplay playsinline preload="metadata"></video>';
         }
 
         if (directImage) {
@@ -208,6 +217,7 @@ $(document).ready(function() {
         lastFocusedLink = link;
         modal.toggleClass("is-post-preview", isFacebookPostPreview(url) && !isAlbumButton(link));
         modal.toggleClass("is-album-preview", isAlbumButton(link));
+        modal.toggleClass("is-drive-preview", isGoogleDrivePreview(url));
         frame.html(markup);
         modal.addClass("is-open").attr("aria-hidden", "false");
         $("body").addClass("has-video-preview-open");
@@ -220,6 +230,7 @@ $(document).ready(function() {
         modal.removeClass("is-open").attr("aria-hidden", "true");
         modal.removeClass("is-post-preview");
         modal.removeClass("is-album-preview");
+        modal.removeClass("is-drive-preview");
         $("body").removeClass("has-video-preview-open");
         frame.empty();
 
@@ -275,6 +286,14 @@ $(document).ready(function() {
         }
     })
     .catch(function() {
-        counter.closest(".visitor-counter").hide();
+        fetch("https://visitor.6developer.com/visit?domain=" + encodeURIComponent(hostname))
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data && typeof data.totalCount !== "undefined") {
+                    counter.text(data.totalCount);
+                }
+            });
     });
 });
